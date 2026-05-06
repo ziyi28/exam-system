@@ -9,26 +9,26 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * projectName: day23_exam-system-server
- *
- * @author: 赵伟风
- * description: Minio的配置类，完成MinioClient组件的创建
- */
+ * @Author: ziyi
+ * @Date: 2026/5/6 22:24
+ * @Version: v1.0.0
+ * @Description: TODO 将minioclient加入到ioc容器
+ **/
 @Slf4j
 @Configuration
 @EnableConfigurationProperties(MinioProperties.class)
 public class MinioConfiguration {
-
     @Autowired
     private MinioProperties minioProperties;
 
     @Bean
     public MinioClient minioClient() {
-        MinioClient minioClient = MinioClient.builder()
+        MinioClient minio = MinioClient.builder()
+                .credentials(minioProperties.getAccessKey(), minioProperties.getSecretKey())
                 .endpoint(minioProperties.getEndpoint())
-                .credentials(minioProperties.getUsername(), minioProperties.getPassword())
                 .build();
-        log.info("完成了minio的连接和配置！minio客户端对象为：{}",minioClient);
-        return minioClient;
+        log.info("完成minio的连接，连接的客户端为：{}",minio);
+        return minio;
     }
+
 }

@@ -137,12 +137,13 @@ public class BannerController {
     @Operation(summary = "删除轮播图", description = "根据ID删除指定的轮播图")  // API描述
     public Result<String> deleteBanner(@Parameter(description = "轮播图ID") @PathVariable Long id) {
         //直接删除
-        boolean removed = bannerService.removeById(id);
-        if (removed) {
-            log.info("删除轮播图数据成功！删除id为：{}",id);
-            return Result.success("轮播图数据删除成功！");
+        boolean b = bannerService.removeById(id);
+        if (b) {
+            log.info("轮播图id为{}的轮播图删除成功",id);
+            return Result.success("轮播图删除成功");
+
         }
-        log.info("删除轮播图数据失败！计划要删除id为：{}",id);
+        log.info("轮播图id为{}的轮播图删除失败",id);
         return Result.error("轮播图数据删除失败！");
     }
     
@@ -165,6 +166,7 @@ public class BannerController {
         //更改
         boolean update = bannerService.update(lambdaUpdateWrapper);
         if (update){
+            log.info("轮播图状态修改成功，修改后的状态为:",isActive);
             return  Result.success("轮播图状态更改成功");
         }
 

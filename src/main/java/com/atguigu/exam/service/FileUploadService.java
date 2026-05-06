@@ -1,9 +1,12 @@
 package com.atguigu.exam.service;
 
 
+import io.minio.errors.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * 文件上传服务
@@ -19,5 +22,4 @@ public interface FileUploadService {
      * @return 可以访问的文件地址
      */
     String uploadFile(String folder, MultipartFile file) throws Exception;
-
 } 

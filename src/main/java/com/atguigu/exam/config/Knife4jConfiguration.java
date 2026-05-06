@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Configuration;
 /**
  * projectName: com.atguigu.exam.config
  *
- * @author: 赵伟风
+ * @author: ziyi
  * description:
  */
 @Configuration

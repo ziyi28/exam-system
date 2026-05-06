@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Configuration;
 /**
  * projectName: day23_exam-system-server
  *
- * @author: 赵伟风
+ * @author: ziyi
  * description: mybatis-plus专属的配置类
  */
 @Configuration

@@ -3,78 +3,67 @@ package com.atguigu.exam.service.impl;
 import com.atguigu.exam.config.properties.MinioProperties;
 import com.atguigu.exam.service.FileUploadService;
 import io.minio.*;
+import io.minio.errors.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.UUID;
+
 
 /**
  * projectName: com.atguigu.exam.service.impl
  *
- * @author: 赵伟风
+ * @author: ziyi
  * description:
  */
 @Service
 @Slf4j
 public class FileUploadServiceImpl implements FileUploadService {
-
     @Autowired
-    private MinioClient minioClient;
+    MinioClient minio;
     @Autowired
-    private MinioProperties minioProperties;
+    MinioProperties minioProperties;
 
     @Override
     public String uploadFile(String folder, MultipartFile file) throws Exception {
-        //1. 判断桶是否存在
-        boolean bucketExists = minioClient.bucketExists(BucketExistsArgs.builder().bucket(minioProperties.getBucketName()).build());
-        //2. 不存在，创建桶，同时设置访问权限
+        // 1.先判断桶是否存在
+        boolean bucketExists = minio.bucketExists(BucketExistsArgs.builder()
+                .bucket(minioProperties.getBucketName()).build());
+        // 2.不存在则创建
         if (!bucketExists) {
-            //创建桶
-            minioClient.makeBucket(MakeBucketArgs.builder().bucket(minioProperties.getBucketName()).build());
+            minio.makeBucket(MakeBucketArgs.builder()
+                    .bucket(minioProperties.getBucketName())
+                    .build());
             String config = """
-                        {
-                              "Statement" : [ {
-                                "Action" : "s3:GetObject",
-                                "Effect" : "Allow",
-                                "Principal" : "*",
-                                "Resource" : "arn:aws:s3:::%s/*"
-                              } ],
-                              "Version" : "2012-10-17"
-                        }
+                    {
+                        "Statement" : [ {
+                            "Action" : "s3:GetObject",
+                            "Effect" : "Allow",
+                            "Principal" : "*",
+                            "Resource" : "arn:aws:s3:::%s/*"
+                        } ],
+                        "Version" : "2012-10-17"
+                    }
                     """.formatted(minioProperties.getBucketName());
-            minioClient.setBucketPolicy(SetBucketPolicyArgs.builder()
-                            .bucket(minioProperties.getBucketName())
+            minio.setBucketPolicy(SetBucketPolicyArgs.builder()
                             .config(config)
                     .build());
         }
-        //3. 处理上传的对象名（影响，minio桶中的文件结构！）
-        //现在： exam0625 / folder / ai.png  缺点： 所有文件都平铺（banner，video）不好区分！ 核心缺点，可能覆盖！
-        //小知识点： x/x/x.png -> exam0625 /x/x/ x.png
-        //解决覆盖问题： 确保对象和文件的名字唯一即可！！ uuid - - -
-        //1.需要添加文件夹 2.添加uuid确保不重复
-        String objectName = folder + "/" + new SimpleDateFormat("yyyyMMdd").format(new Date()) + "/" +
-                UUID.randomUUID().toString().replaceAll("-","")+"_"+ file.getOriginalFilename();
-
-        log.debug("文件上传核心业务方法，处理后的文件对象名：{}",objectName);
-
-        //4. 上传文件 putObject方法
-        //putObject . 上传文件数据 .steam(文件输入流)
-        //uploadObject .上传文件数据 .filename(文件的磁盘地址 c:\\)
-        minioClient.putObject(PutObjectArgs.builder()
+        //3.处理在minio服务器中的重名覆盖问题
+        String name = folder+"/"+ new SimpleDateFormat("yyyyMMdd")+"/"+
+                UUID.randomUUID().toString().replaceAll("_","")+"_"+file.getOriginalFilename();
+        log.debug("文件上传核心业务方法，处理后的文件对象名：{}",name);
+        //4.上传文件
+        minio.putObject(PutObjectArgs.builder()
                         .bucket(minioProperties.getBucketName())
                         .contentType(file.getContentType())
-                        .object(objectName) //对象
-                        .stream(file.getInputStream(),file.getSize(),-1) //-1 我们不指定文件切割大小！让minio自动处理！
+                        .object(name)
+                        .stream(file.getInputStream(),file.getSize(),-1)
                 .build());
-
-        //5. 拼接回显地址 【端点 + 桶 + 对象名】
-        String url = String.join("/", minioProperties.getEndpoint(), minioProperties.getBucketName(), objectName);
-        log.info("文件上传核心业务，完成{}文件上传，返回地址为：{}",objectName,url);
+        String url = String.join("/",minioProperties.getEndpoint(), minioProperties.getBucketName(),name);
+        log.info("文件上传核心业务，完成{}文件上传，返回地址为：{}",name,url);
         return url;
     }
 }

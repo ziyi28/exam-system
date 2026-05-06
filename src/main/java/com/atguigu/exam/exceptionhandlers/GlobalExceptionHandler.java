@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 /**
  * projectName: day23_exam-system-server
  *
- * @author: 赵伟风
+ * @author: ziyi
  * description: 全局异常处理器
  */
 @Slf4j

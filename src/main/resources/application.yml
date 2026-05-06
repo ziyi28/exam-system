@@ -30,7 +30,7 @@ mybatis-plus:
 
 # minio的配置
 minio:
-  endpoint: http://47.94.86.115:9000
-  username: minioadmin
-  password: minioadmin
-  bucket-name: exam0625
+  endpoint: http://47.110.158.86:9000
+  access-key: ziyi
+  secret-key: ziyi287411
+  bucket-name: exam
