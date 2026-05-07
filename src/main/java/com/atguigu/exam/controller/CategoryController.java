@@ -2,24 +2,28 @@ package com.atguigu.exam.controller;
 
 import com.atguigu.exam.common.Result;
 import com.atguigu.exam.entity.Category;
+import com.atguigu.exam.service.CategoryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 分类控制器 - 处理题目分类管理相关的HTTP请求
  * 包括分类的增删改查、树形结构展示等功能
  */
+@Slf4j
 @RestController  // REST控制器，返回JSON数据
 @RequestMapping("/api/categories")  // 分类API路径前缀
 @Tag(name = "分类管理", description = "题目分类相关操作，包括分类的增删改查、树形结构管理等功能")  // Swagger API分组
 public class CategoryController {
-
-
+    @Autowired
+    private CategoryService categoryService;
     /**
      * 获取分类列表（包含题目数量）
      * @return 分类列表数据
@@ -27,7 +31,9 @@ public class CategoryController {
     @GetMapping  // 处理GET请求
     @Operation(summary = "获取分类列表", description = "获取所有题目分类列表，包含每个分类下的题目数量统计")  // API描述
     public Result<List<Category>> getCategories() {
-        return Result.success(null);
+        List<Category> list = categoryService.getCategoryList();
+        log.info("查询分类列表和对应题目数量成功，查询的集合为：{}",list);
+        return Result.success(list,"查询题目分类成功");
     }
 
     /**

@@ -28,15 +28,15 @@ public class BannerServiceImpl extends ServiceImpl<BannerMapper, Banner> impleme
     @Override
     public String uploadBannerImage(MultipartFile file) throws Exception {
         //1.非空校验
-        if (file == null || file.isEmpty()){
-            throw new RuntimeException("上传轮播图图片失败！原因：上传的文件为空！");
+        if (file == null || file.isEmpty()) {
+            throw new RuntimeException("上传轮播图失败，失败原因：上传的轮播图为空");
         }
-        //2.格式校验
+        //2.类型判断
         if (!file.getContentType().startsWith("image")){
-            throw new RuntimeException("上传轮播图图片失败！原因：上传的文件类型错误,非图片！");
+            throw new RuntimeException("上传轮播图失败，失败原因：轮播图类型错误！！");
         }
         //3.调用核心业务
-        String url = fileUploadService.uploadFile("banners", file);
+        String url = fileUploadService.uploadFile("banners",file);
         //4.返回地址
         return url;
     }
