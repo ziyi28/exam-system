@@ -34,4 +34,5 @@ public interface QuestionService extends IService<Question> {
 
 
     void customPageService(IPage<Question> customPage, QuestionPageVo questionPageVo);
+    void customPageServiceForJava(IPage<Question> customPage, QuestionPageVo questionPageVo);
 }

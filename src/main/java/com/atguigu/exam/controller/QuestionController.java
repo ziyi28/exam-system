@@ -76,7 +76,8 @@ public class QuestionController {
             @Parameter(description = "每页显示数量", example = "10") @RequestParam(defaultValue = "10") Integer size,
             QuestionPageVo questionPageVo) {
         Page<Question> customPage = new Page<>(page,size);
-        questionService.customPageService(customPage,questionPageVo);
+        // questionService.customPageService(customPage,questionPageVo);
+        questionService.customPageServiceForJava(customPage,questionPageVo);
         log.info("分页查询数据成功，查询的总条数为{},数据为{}",customPage.getTotal(),customPage.getRecords());
         // 返回统一格式的成功响应
         return Result.success(customPage);

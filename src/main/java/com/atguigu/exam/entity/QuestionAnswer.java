@@ -10,7 +10,7 @@ import lombok.Data;
  * 题目答案实体类 - 题目的标准答案信息
  */
 @Data
-@TableName("question_answers")
+@TableName("question_answer")
 @Schema(description = "题目答案信息")
 public class QuestionAnswer  extends BaseEntity{
 
