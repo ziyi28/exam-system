@@ -2,6 +2,7 @@ package com.atguigu.exam.service.impl;
 
 
 import com.atguigu.exam.entity.Category;
+import com.atguigu.exam.entity.Question;
 import com.atguigu.exam.mapper.CategoryMapper;
 import com.atguigu.exam.mapper.QuestionMapper;
 import com.atguigu.exam.service.CategoryService;
@@ -126,5 +127,27 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper,Category> im
         }
         //执行修改
         updateById(category);
+    }
+
+    /**
+     *删除分类信息
+     *
+     * @param id 要删除的分类id
+     */
+    @Override
+    public void removeCategory(Long id) {
+        //判断分类是否为顶级分类
+        Category category = getById(id);
+        if (category.getParentId()==0L){
+            throw new RuntimeException("该分类为顶级父分类无法删除");
+        }
+        //判断该分类下是否有题目
+        LambdaQueryWrapper<Question> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(Question::getCategoryId,id);
+        Long l = questionMapper.selectCount(lambdaQueryWrapper);
+        if (l>0){
+            throw new RuntimeException("分类%s下有%s道题目，无法删除！！".formatted(category.getName(),l));
+        }
+        removeById(id);
     }
 }
