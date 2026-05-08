@@ -24,7 +24,7 @@
         </if> <if test="questionPageVo.type!=null and questionPageVo.type!='' ">
             and qs.type=#{questionPageVo.type}
         </if> <if test="questionPageVo.keyword!=null and questionPageVo.keyword!='' ">
-            and qsa.keywords=#{questionPageVo.keyword}
+            and title like concat('%',#{questionPageVo.keyword},'%')
         </if>
         order by qs.create_time desc
     </select>
