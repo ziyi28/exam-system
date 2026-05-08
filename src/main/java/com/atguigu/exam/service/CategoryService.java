@@ -11,4 +11,6 @@ public interface CategoryService extends IService<Category> {
     List<Category> getCategoryList();
 
     List<Category> getCategoryTreeCount();
+
+    void saveCategory(Category category);
 }

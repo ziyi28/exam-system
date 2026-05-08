@@ -62,7 +62,9 @@ public class CategoryController {
     @PostMapping  // 处理POST请求
     @Operation(summary = "添加新分类", description = "创建新的题目分类，支持设置父分类实现层级结构")  // API描述
     public Result<Void> addCategory(@RequestBody Category category) {
-        return Result.success(null);
+        categoryService.saveCategory(category);
+        log.info("在{}父分类下，新增子分类{}成功",category.getParentId(),category.getName());
+        return Result.success("新增分类成功");
     }
 
     /**

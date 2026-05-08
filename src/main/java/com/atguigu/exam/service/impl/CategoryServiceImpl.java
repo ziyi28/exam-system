@@ -5,6 +5,7 @@ import com.atguigu.exam.entity.Category;
 import com.atguigu.exam.mapper.CategoryMapper;
 import com.atguigu.exam.mapper.QuestionMapper;
 import com.atguigu.exam.service.CategoryService;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.checkerframework.checker.units.qual.A;
@@ -81,5 +82,27 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper,Category> im
                 }
                 );
         return resultList;
+    }
+
+    /**
+     *
+     *新增子分类
+     * @param category 子分类信息
+     */
+    @Override
+    public void saveCategory(Category category) {
+        //1.判断同一父分类下是否重名
+        LambdaQueryWrapper<Category> lambdaQueryWrapper=new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(Category::getParentId,category.getParentId())
+                .eq(Category::getName,category.getName());
+        CategoryMapper categoryMapper = getBaseMapper();
+        boolean exists = categoryMapper.exists(lambdaQueryWrapper);
+        if (exists){
+            Category category1 = getById(category.getParentId());
+            throw new RuntimeException("父分类：%s已经有名为%s的分类，新增子分类失败".formatted(category1.getName(),category.getName()));
+        }
+        save(category);
+
+
     }
 }
