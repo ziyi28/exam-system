@@ -1,10 +1,14 @@
 package com.atguigu.exam.service.impl;
 
 import com.atguigu.exam.entity.Question;
+import com.atguigu.exam.mapper.QuestionAnswerMapper;
 import com.atguigu.exam.mapper.QuestionMapper;
 import com.atguigu.exam.service.QuestionService;
+import com.atguigu.exam.vo.QuestionPageVo;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 /**
@@ -14,6 +18,11 @@ import org.springframework.stereotype.Service;
 @Slf4j
 @Service
 public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> implements QuestionService {
-    
 
-} 
+    @Autowired
+    QuestionAnswerMapper questionAnswerMapper;
+    @Override
+    public void customPageService(IPage<Question> customPage, QuestionPageVo questionPageVo) {
+        questionAnswerMapper.customPage(customPage,questionPageVo);
+    }
+}

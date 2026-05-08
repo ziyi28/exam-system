@@ -3,4 +3,29 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.atguigu.exam.mapper.QuestionAnswerMapper">
+    <resultMap id="costomMapper" type="com.atguigu.exam.entity.Question">
+        <association property="answer" javaType="com.atguigu.exam.entity.QuestionAnswer">
+            <id property="id" column="qas_id"/>
+            <result column="qsa.create_time" property="createTime"/>
+            <result column="qsa_update_time" property="updateTime"/>
+        </association>
+        <collection property="choices" ofType="com.atguigu.exam.entity.QuestionChoice"
+                    column="id" select="com.atguigu.exam.mapper.QuestionChoiceMapper.selectListByQuestionId"/>
+     </resultMap>
+    <select id="customPage" resultMap="costomMapper">
+        SELECT qs.*,qsa.id qsa_id,qsa.answer ,qsa.keywords,qsa.create_time qsa_create_time ,qsa.update_time qsa_update_time FROM questions qs
+        left join question_answer qsa on qs.id=qsa.question_id
+        where qs.is_deleted=0 and qsa.is_deleted=0
+        <if test="questionPageVo.categoryId!=null">
+            and qs.category_id=#{questionPageVo.categoryId}
+        </if>
+        <if test="questionPageVo.difficulty!=null and questionPageVo.difficulty!='' ">
+            and qs.difficulty=#{questionPageVo.difficulty}
+        </if> <if test="questionPageVo.type!=null and questionPageVo.type!='' ">
+            and qs.type=#{questionPageVo.type}
+        </if> <if test="questionPageVo.keyword!=null and questionPageVo.keyword!='' ">
+            and qsa.keywords=#{questionPageVo.keyword}
+        </if>
+        order by qs.create_time desc
+    </select>
 </mapper>

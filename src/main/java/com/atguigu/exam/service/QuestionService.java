@@ -1,6 +1,8 @@
 package com.atguigu.exam.service;
 
 import com.atguigu.exam.entity.Question;
+import com.atguigu.exam.vo.QuestionPageVo;
+import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
@@ -31,4 +33,5 @@ import java.util.List;
 public interface QuestionService extends IService<Question> {
 
 
-} 
+    void customPageService(IPage<Question> customPage, QuestionPageVo questionPageVo);
+}
