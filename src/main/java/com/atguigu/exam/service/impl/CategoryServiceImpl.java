@@ -7,9 +7,13 @@ import com.atguigu.exam.mapper.QuestionMapper;
 import com.atguigu.exam.service.CategoryService;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -53,5 +57,29 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper,Category> im
                         category.setCount(resultCount.getOrDefault(category.getId(),0L)));
 
         return list;
+    }
+
+    @Override
+    public List<Category> getCategoryTreeCount() {
+        //获取所有分类
+        List<Category> list = list();
+        //填充count
+        List<Category> categories=fillCategoryCount(list);
+        //根据parent_id分类
+        Map<Long, List<Category>> groupedList = categories.stream().collect(Collectors.groupingBy(Category::getParentId));
+        //分组出parent_id为0的
+        List<Category> resultList = list.stream().filter(category -> category.getParentId() == 0L)
+                .collect(Collectors.toList());
+        //填充子分类到child
+        resultList.stream().forEach(category ->
+                {
+                    List<Category> child = groupedList.getOrDefault(category.getId(), new ArrayList<>());
+                    child.sort(Comparator.comparingInt(Category::getSort));
+                    category.setChildren(child);
+                    long sum = child.stream().mapToLong(category1 -> category1.getCount()).sum();
+                    category.setCount(category.getCount()+sum);
+                }
+                );
+        return resultList;
     }
 }

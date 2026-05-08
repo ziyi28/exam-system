@@ -19,35 +19,43 @@ import java.util.Map;
  */
 @Slf4j
 @RestController  // REST控制器，返回JSON数据
+@CrossOrigin
 @RequestMapping("/api/categories")  // 分类API路径前缀
 @Tag(name = "分类管理", description = "题目分类相关操作，包括分类的增删改查、树形结构管理等功能")  // Swagger API分组
 public class CategoryController {
     @Autowired
     private CategoryService categoryService;
+
     /**
      * 获取分类列表（包含题目数量）
+     *
      * @return 分类列表数据
      */
     @GetMapping  // 处理GET请求
     @Operation(summary = "获取分类列表", description = "获取所有题目分类列表，包含每个分类下的题目数量统计")  // API描述
     public Result<List<Category>> getCategories() {
         List<Category> list = categoryService.getCategoryList();
-        log.info("查询分类列表和对应题目数量成功，查询的集合为：{}",list);
-        return Result.success(list,"查询题目分类成功");
+        log.info("查询分类列表和对应题目数量成功，查询的集合为：{}", list);
+        return Result.success(list, "查询题目分类成功");
     }
 
     /**
      * 获取分类树形结构
+     *
      * @return 分类树数据
      */
     @GetMapping("/tree")  // 处理GET请求
     @Operation(summary = "获取分类树形结构", description = "获取题目分类的树形层级结构，用于前端树形组件展示")  // API描述
     public Result<List<Category>> getCategoryTree() {
-        return Result.success(null);
+
+        List<Category> list = categoryService.getCategoryTreeCount();
+        log.info("查询题目树状分类成功,查询的集合为{}", list);
+        return Result.success(list, "查询题目树状分类成功");
     }
 
     /**
      * 添加分类
+     *
      * @param category 分类对象
      * @return 操作结果
      */
@@ -59,6 +67,7 @@ public class CategoryController {
 
     /**
      * 更新分类
+     *
      * @param category 分类对象
      * @return 操作结果
      */
@@ -70,6 +79,7 @@ public class CategoryController {
 
     /**
      * 删除分类
+     *
      * @param id 分类ID
      * @return 操作结果
      */
