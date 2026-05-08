@@ -76,7 +76,10 @@ public class CategoryController {
     @PutMapping  // 处理PUT请求
     @Operation(summary = "更新分类信息", description = "修改分类的名称、描述、排序等信息")  // API描述
     public Result<Void> updateCategory(@RequestBody Category category) {
-        return Result.success(null);
+        categoryService.updateCategory(category);
+        Category parent = categoryService.getById(category.getParentId());
+        log.info("在父分类{}下更新子分类{}成功",parent.getName(),category.getName());
+        return Result.success("更新分类成功");
     }
 
     /**

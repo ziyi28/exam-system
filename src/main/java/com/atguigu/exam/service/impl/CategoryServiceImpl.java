@@ -105,4 +105,26 @@ public class CategoryServiceImpl extends ServiceImpl<CategoryMapper,Category> im
 
 
     }
+
+    /**
+     *
+     *修改同一父分类下子分类信息
+     * @param category 新的分类信息
+     */
+    @Override
+    public void updateCategory(Category category) {
+        //判断同一父分类下，是否和其它分类同名，且id不同
+        LambdaQueryWrapper<Category> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(Category::getParentId,category.getParentId())
+                .eq(Category::getName,category.getName())
+                .ne(Category::getId,category.getId());
+        CategoryMapper baseMapper = getBaseMapper();
+        boolean exists = baseMapper.exists(lambdaQueryWrapper);
+        if (exists){
+            Category parent = getById(category.getParentId());
+            throw new RuntimeException("父分类%s下已有名为%s的子分类，修改分类失败！！".formatted(parent.getName(),category.getName()));
+        }
+        //执行修改
+        updateById(category);
+    }
 }
