@@ -19,13 +19,11 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -228,5 +226,46 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         questionChoiceMapper.delete(choiceLambdaQueryWrapper);
 
 
+    }
+
+    @Override
+    public List<Question> customPopularQuestion(Integer size) {
+        //定义一个热门题目集合
+        List<Question> popularQuestions = new ArrayList<>();
+        if (size<=0){
+            throw new RuntimeException("传入的热门数量大小为零或者有误！！");
+        }
+        //获取redis中的热门题目
+        List<Question> listQuestion = new ArrayList<>();
+        Set<ZSetOperations.TypedTuple<Object>> typedTuples = redisUtils.zReverseRangeWithScores(CacheConstants.POPULAR_QUESTIONS_KEY, 0, size - 1);
+        List<Long> listids= new ArrayList<>();
+         if (typedTuples!=null && typedTuples.size()>0){
+            List<Long> popularListids = typedTuples.stream().sorted((o1, o2) ->
+                    Integer.compare(o2.getScore().intValue(), o1.getScore().intValue())
+            ).map(q -> Long.valueOf(q.getValue().toString())).collect(Collectors.toList());
+            log.debug("从zset集合中查到的有序id集合为：{}",popularListids);
+            listids.addAll(popularListids);
+            for (Long id : popularListids) {
+                Question question = getById(id);
+                if (question!=null){
+                    listQuestion.add(question);
+                }
+
+            }
+            popularQuestions.addAll(listQuestion);
+            log.debug("从redis中查出来的热题数量为{}，题目集合为{}",popularQuestions.size(),popularQuestions);
+        }
+        int diff=size-popularQuestions.size();
+        if (diff>0){
+            LambdaQueryWrapper<Question> wrapper = new LambdaQueryWrapper<>();
+            wrapper.notIn(Question::getId,listids).orderByDesc(Question::getCreateTime).last("limit "+diff);
+            List<Question> list = list(wrapper);
+            if (list!=null && list.size()>0){
+            popularQuestions.addAll(list);}
+        }
+        //集中填充题目答案和选项
+        fillQuestionChoiceAndAnswer(popularQuestions);
+
+        return popularQuestions;
     }
 }
