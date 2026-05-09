@@ -37,4 +37,6 @@ public interface QuestionService extends IService<Question> {
     void customPageServiceForJava(IPage<Question> customPage, QuestionPageVo questionPageVo);
 
     Question customDetailQuestion(Long id);
+
+    void customSaveQuestion(Question question);
 }

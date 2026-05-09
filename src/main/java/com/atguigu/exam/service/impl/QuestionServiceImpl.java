@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -103,5 +104,52 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
     private void increamentQuestion(Long questionId) {
         Double score = redisUtils.zIncrementScore(CacheConstants.POPULAR_QUESTIONS_KEY,questionId,1);
         log.info("完成{}题目分数累计，累计后分数为：{}",questionId,score);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void customSaveQuestion(Question question) {
+        //判断同一分类下title是否重名
+        LambdaQueryWrapper<Question> lambdaQueryWrapper =
+                 new LambdaQueryWrapper<>();
+        lambdaQueryWrapper
+                .eq(Question::getType,question.getType())
+                .eq(Question::getTitle,question.getTitle());
+        QuestionMapper basemapper = getBaseMapper();
+        boolean exists = basemapper.exists(lambdaQueryWrapper);
+        if (exists) {
+            throw new RuntimeException("保存题目信息失败，%s分类下已经有名为%stitle的%s题型".formatted(question.getCategory(),question.getTitle(),question.getType()));
+
+        }
+        //保存题目
+        boolean save = save(question);
+        if (!save) {
+            throw new RuntimeException("保存题目信息失败");
+        }
+        //填充答案
+        QuestionAnswer answer = question.getAnswer();
+        if (answer==null){
+            answer=new QuestionAnswer();
+        }
+        answer.setQuestionId(question.getId());
+        //判断是否为选择题
+        List<QuestionChoice> choices = question.getChoices();
+        StringBuilder sb = new StringBuilder();
+        if ("CHOICE".equals(question.getType())){
+            for (int i = 0; i < choices.size(); i++) {
+                QuestionChoice questionChoice = choices.get(i);
+                questionChoice.setQuestionId(question.getId());
+                if (questionChoice.getIsCorrect()){
+                    if (sb.length()>0){
+                        sb.append(",");
+                    }
+                    sb.append((char)'A'+i);
+                }
+            }
+            //填充选择题答案
+            answer.setAnswer(sb.toString());
+        }
+        //保存答案
+        questionAnswerMapper.insert(answer);
     }
 }
