@@ -170,12 +170,12 @@ public class QuestionController {
     @Operation(summary = "删除题目", description = "根据ID删除指定的题目，包括关联的选项和答案数据")  // API描述
     public Result<String> deleteQuestion(
             @Parameter(description = "题目ID") @PathVariable Long id) {
-        // 根据操作结果返回不同的响应
-        if (true) {
-            return Result.success("题目删除成功");
-        } else {
-            return Result.error("题目删除失败");
-        }
+
+            questionService.customRemoveQuestionById(id);
+            log.info("删除id为{}的题目成功",id);
+
+            return Result.error("题目删除成功");
+
     }
 
     /**
@@ -270,10 +270,11 @@ public class QuestionController {
     @GetMapping("/popular")  // 处理GET请求
     @Operation(summary = "获取热门题目", description = "获取访问次数最多的热门题目，用于首页推荐展示")  // API描述
     public Result<List<Question>> getPopularQuestions(
-            @Parameter(description = "返回题目数量", example = "10") @RequestParam(defaultValue = "10") Integer size) {
-
+            @Parameter(description = "返回题目数量", example = "10") @RequestParam(defaultValue = "6") Integer size) {
+        List<Question> popularQuestion=questionService.customPopularQuestion(size);
         // 异常处理：记录日志并返回友好的错误信息
-        return Result.error("获取热门题目失败");
+        log.info("查询热门题目成功，查询到{}个题目，具体题目集合：{}",size,popularQuestion);
+        return Result.success(popularQuestion);
 
     }
 

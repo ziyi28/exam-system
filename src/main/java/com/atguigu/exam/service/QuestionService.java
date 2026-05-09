@@ -64,4 +64,8 @@ public interface QuestionService extends IService<Question> {
      * @param question
      */
     void customUpdateQuestion(Question question);
+
+    void customRemoveQuestionById(Long id);
+
+    List<Question> customPopularQuestion(Integer size);
 }

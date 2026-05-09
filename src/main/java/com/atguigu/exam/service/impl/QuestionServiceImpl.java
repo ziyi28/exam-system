@@ -2,6 +2,7 @@ package com.atguigu.exam.service.impl;
 
 import com.atguigu.exam.common.CacheConstants;
 import com.atguigu.exam.common.Result;
+import com.atguigu.exam.entity.PaperQuestion;
 import com.atguigu.exam.entity.Question;
 import com.atguigu.exam.entity.QuestionAnswer;
 import com.atguigu.exam.entity.QuestionChoice;
@@ -200,6 +201,31 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
 
         }
         questionAnswerMapper.updateById(answer);
+
+
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void customRemoveQuestionById(Long id) {
+        //判断试题中是否包含这道题
+        LambdaQueryWrapper<PaperQuestion> wrapper = new LambdaQueryWrapper<>();
+        wrapper.eq(PaperQuestion::getQuestionId,id);
+        Long l = paperQuestionMapper.selectCount(wrapper);
+        if (l>0){
+            throw new RuntimeException("删除id为%s的题目失败，此题被其它试卷引用了%s次".formatted(id,l));
+        }
+        //删除答案和题目
+        boolean isdelete = removeById(id);
+        if (!isdelete) {
+            throw new RuntimeException("删除id为%s的题目失败".formatted(id));
+        }
+        LambdaQueryWrapper<QuestionAnswer> lambdaQueryWrapper = new LambdaQueryWrapper<>();
+        lambdaQueryWrapper.eq(QuestionAnswer::getQuestionId,id);
+        questionAnswerMapper.delete(lambdaQueryWrapper);
+        LambdaQueryWrapper<QuestionChoice> choiceLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        choiceLambdaQueryWrapper.eq(QuestionChoice::getQuestionId,id);
+        questionChoiceMapper.delete(choiceLambdaQueryWrapper);
 
 
     }
