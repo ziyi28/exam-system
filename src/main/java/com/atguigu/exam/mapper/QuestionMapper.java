@@ -17,4 +17,5 @@ public interface QuestionMapper extends BaseMapper<Question> {
 
     @Select("select category_id,count(*) ct from questions where is_deleted=0 GROUP BY category_id;")
     List<Map<Long, Long>> selectCategoryCount();
+    Question customGetById(Long id);
 }

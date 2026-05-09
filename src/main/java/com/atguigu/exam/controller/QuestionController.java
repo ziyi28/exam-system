@@ -99,8 +99,9 @@ public class QuestionController {
     // API描述
     public Result<Question> getQuestionById(
             @Parameter(description = "题目ID", example = "1") @PathVariable Long id) {
-
-        return Result.success(null);
+        Question question =  questionService.customDetailQuestion(id);
+        log.info("根据id{}查询题目信息成功,查询的题目内容为",id,question);
+        return Result.success(question);
     }
 
     /**

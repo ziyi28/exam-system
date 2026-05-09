@@ -1,5 +1,6 @@
 package com.atguigu.exam.service.impl;
 
+import com.atguigu.exam.common.CacheConstants;
 import com.atguigu.exam.entity.Question;
 import com.atguigu.exam.entity.QuestionAnswer;
 import com.atguigu.exam.entity.QuestionChoice;
@@ -7,6 +8,7 @@ import com.atguigu.exam.mapper.QuestionAnswerMapper;
 import com.atguigu.exam.mapper.QuestionChoiceMapper;
 import com.atguigu.exam.mapper.QuestionMapper;
 import com.atguigu.exam.service.QuestionService;
+import com.atguigu.exam.utils.RedisUtils;
 import com.atguigu.exam.vo.QuestionPageVo;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -34,6 +36,11 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
     QuestionAnswerMapper questionAnswerMapper;
     @Autowired
     QuestionChoiceMapper questionChoiceMapper;
+    @Autowired
+    private QuestionMapper questionMapper;
+    @Autowired
+    private RedisUtils redisUtils;
+
     @Override
     public void customPageService(IPage<Question> customPage, QuestionPageVo questionPageVo) {
         questionAnswerMapper.customPage(customPage,questionPageVo);
@@ -80,4 +87,21 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
             question.setAnswer(answerMap.get(question.getId()));
         });
     }
+
+    @Override
+    public Question customDetailQuestion(Long id) {
+        Question question = questionMapper.customGetById(id);
+        if (question==null){
+            throw new RuntimeException("查询题目详情失败，题目可能已经被删除，题目id为%s".formatted(id));
+        }
+        new Thread(()->{
+            increamentQuestion(question.getId());
+        }).start();
+        return question;
     }
+
+    private void increamentQuestion(Long questionId) {
+        Double score = redisUtils.zIncrementScore(CacheConstants.POPULAR_QUESTIONS_KEY,questionId,1);
+        log.info("完成{}题目分数累计，累计后分数为：{}",questionId,score);
+    }
+}
