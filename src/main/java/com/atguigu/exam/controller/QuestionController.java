@@ -2,6 +2,7 @@ package com.atguigu.exam.controller;
 
 import com.atguigu.exam.common.Result;
 import com.atguigu.exam.entity.Question;
+import com.atguigu.exam.mapper.QuestionAnswerMapper;
 import com.atguigu.exam.mapper.QuestionMapper;
 import com.atguigu.exam.service.QuestionService;
 import com.atguigu.exam.vo.QuestionPageVo;
@@ -49,6 +50,8 @@ import java.util.stream.Collectors;
 public class QuestionController {
     @Autowired
     QuestionService questionService;
+    @Autowired
+    private QuestionAnswerMapper questionAnswerMapper;
 
     /**
      * 分页查询题目列表（支持多条件筛选）
@@ -144,7 +147,9 @@ public class QuestionController {
     public Result<Question> updateQuestion(
             @Parameter(description = "题目ID") @PathVariable Long id,
             @RequestBody Question question) {
-        return Result.success(null);
+        questionService.customUpdateQuestion(question);
+        log.info("更新题目信息成功，题目id为：{}",question.getId());
+        return Result.success("更新题目信息成功");
     }
 
     /**

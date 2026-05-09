@@ -34,9 +34,34 @@ public interface QuestionService extends IService<Question> {
 
 
     void customPageService(IPage<Question> customPage, QuestionPageVo questionPageVo);
+
+    /**
+     *用java代码查询所有题目信息
+     *
+     * @param customPage
+     * @param questionPageVo
+     */
     void customPageServiceForJava(IPage<Question> customPage, QuestionPageVo questionPageVo);
 
+    /**
+     *
+     *根据id查询题目信息
+     * @param id
+     * @return {@link Question }
+     */
     Question customDetailQuestion(Long id);
 
+    /**
+     *保存题目信息
+     *
+     * @param question
+     */
     void customSaveQuestion(Question question);
+
+    /**
+     *更新题目信息
+     *
+     * @param question
+     */
+    void customUpdateQuestion(Question question);
 }

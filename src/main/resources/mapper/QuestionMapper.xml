@@ -34,10 +34,10 @@
         qcs.update_time qcs_update_time
         from questions qs
         left join question_answer qsa
-        on qs.id = qsa.question_id
+        on qs.id = qsa.question_id and qsa.is_deleted = 0
         left join question_choices qcs
         on qcs.question_id=qs.id and qcs.is_deleted=0 where
-        qs.is_deleted=0 AND qsa.is_deleted = 0 and qs.id=#{id}
+        qs.is_deleted=0 AND  qs.id=#{id}
         order by sort DESC
     </select>
 </mapper>

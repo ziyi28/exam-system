@@ -1,9 +1,11 @@
 package com.atguigu.exam.service.impl;
 
 import com.atguigu.exam.common.CacheConstants;
+import com.atguigu.exam.common.Result;
 import com.atguigu.exam.entity.Question;
 import com.atguigu.exam.entity.QuestionAnswer;
 import com.atguigu.exam.entity.QuestionChoice;
+import com.atguigu.exam.mapper.PaperQuestionMapper;
 import com.atguigu.exam.mapper.QuestionAnswerMapper;
 import com.atguigu.exam.mapper.QuestionChoiceMapper;
 import com.atguigu.exam.mapper.QuestionMapper;
@@ -41,6 +43,8 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
     private QuestionMapper questionMapper;
     @Autowired
     private RedisUtils redisUtils;
+    @Autowired
+    private PaperQuestionMapper paperQuestionMapper;
 
     @Override
     public void customPageService(IPage<Question> customPage, QuestionPageVo questionPageVo) {
@@ -55,6 +59,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         lambdaQueryWrapper.eq(!ObjectUtils.isEmpty(questionPageVo.getDifficulty()),Question::getDifficulty,questionPageVo.getDifficulty());
         lambdaQueryWrapper.eq(!ObjectUtils.isEmpty(questionPageVo.getType()),Question::getType,questionPageVo.getType());
         lambdaQueryWrapper.like(!ObjectUtils.isEmpty(questionPageVo.getKeyword()),Question::getTitle,questionPageVo.getKeyword());
+        lambdaQueryWrapper.orderByDesc(Question::getUpdateTime);
         //2.分页查询出符合条件的题目
         page(customPage, lambdaQueryWrapper);
         fillQuestionChoiceAndAnswer(customPage.getRecords());
@@ -128,9 +133,6 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         }
         //填充答案
         QuestionAnswer answer = question.getAnswer();
-        if (answer==null){
-            answer=new QuestionAnswer();
-        }
         answer.setQuestionId(question.getId());
         //判断是否为选择题
         List<QuestionChoice> choices = question.getChoices();
@@ -143,7 +145,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
                     if (sb.length()>0){
                         sb.append(",");
                     }
-                    sb.append((char)'A'+i);
+                    sb.append((char)('A'+i));
                 }
             }
             //填充选择题答案
@@ -151,5 +153,54 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         }
         //保存答案
         questionAnswerMapper.insert(answer);
+    }
+    @Transactional(rollbackFor = Exception.class)
+    @Override
+    public void customUpdateQuestion(Question question) {
+        //判断是否重名
+        LambdaQueryWrapper<Question> queryWrapper = new LambdaQueryWrapper<>();
+        queryWrapper.eq(Question::getTitle,question.getTitle()).ne(Question::getId,question.getId());
+        QuestionMapper baseMapper = getBaseMapper();
+        boolean exists = baseMapper.exists(queryWrapper);
+        if (exists){
+            throw new RuntimeException("更新失败，因为已经有名为%s的题目".formatted(question.getTitle()));
+        }
+        //更新题目信息
+        boolean issuccess = updateById(question);
+        if (!issuccess){
+            throw new RuntimeException("修改题目%s失败".formatted(question.getId()));
+
+        }
+
+        QuestionAnswer answer = question.getAnswer();
+        //判断是否为选择题
+        if ("CHOICE".equals(question.getType())){
+            //删除原来的选项
+            questionChoiceMapper.delete(new LambdaQueryWrapper<QuestionChoice>().eq(QuestionChoice::getQuestionId,question.getId()));
+            List<QuestionChoice> choices = question.getChoices();
+            //保存新的选项
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < choices.size(); i++) {
+                QuestionChoice questionChoice = choices.get(i);
+                questionChoice.setQuestionId(question.getId());
+                questionChoice.setId(null);
+                questionChoice.setSort(i);
+                questionChoice.setCreateTime(null);
+                questionChoice.setUpdateTime(null);
+                questionChoiceMapper.insert(questionChoice);
+                if (questionChoice.getIsCorrect()){
+                    if (sb.length()>0){
+                        sb.append(",");
+                    }
+                    sb.append((char) ('A'+i));
+                }
+            }
+            answer.setAnswer(sb.toString());
+
+
+        }
+        questionAnswerMapper.updateById(answer);
+
+
     }
 }
