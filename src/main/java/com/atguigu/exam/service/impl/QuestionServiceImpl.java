@@ -139,6 +139,8 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         if ("CHOICE".equals(question.getType())){
             for (int i = 0; i < choices.size(); i++) {
                 QuestionChoice questionChoice = choices.get(i);
+                //保证排列顺序
+                questionChoice.setSort(i);
                 questionChoice.setQuestionId(question.getId());
                 if (questionChoice.getIsCorrect()){
                     if (sb.length()>0){
@@ -258,7 +260,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         int diff=size-popularQuestions.size();
         if (diff>0){
             LambdaQueryWrapper<Question> wrapper = new LambdaQueryWrapper<>();
-            wrapper.notIn(Question::getId,listids).orderByDesc(Question::getCreateTime).last("limit "+diff);
+            wrapper.notIn(popularQuestions.size()>0 && popularQuestions!=null,Question::getId,listids).orderByDesc(Question::getCreateTime).last("limit "+diff);
             List<Question> list = list(wrapper);
             if (list!=null && list.size()>0){
             popularQuestions.addAll(list);}

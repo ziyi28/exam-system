@@ -9,11 +9,14 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -34,8 +37,16 @@ public class QuestionBatchController {
      */
     @GetMapping("/template")  // 处理GET请求
     @Operation(summary = "下载Excel导入模板", description = "下载题目批量导入的Excel模板文件")  // API描述
-    public ResponseEntity<byte[]> downloadTemplate() {
-      return null;
+    public ResponseEntity<byte[]> downloadTemplate() throws IOException {
+
+        //获取excel模板
+        byte[] bytes = ExcelUtil.generateTemplate();
+        //响应文件
+        ResponseEntity<byte[]> responseEntity = ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,"attachment; filename=question_import_template.xlsx")
+                .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                .body(bytes);
+        return responseEntity;
     }
     
     /**
