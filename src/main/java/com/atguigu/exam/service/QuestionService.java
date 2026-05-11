@@ -1,10 +1,13 @@
 package com.atguigu.exam.service;
 
 import com.atguigu.exam.entity.Question;
+import com.atguigu.exam.vo.QuestionImportVo;
 import com.atguigu.exam.vo.QuestionPageVo;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.IService;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -68,4 +71,6 @@ public interface QuestionService extends IService<Question> {
     void customRemoveQuestionById(Long id);
 
     List<Question> customPopularQuestion(Integer size);
+
+    List<QuestionImportVo> previewExcel(MultipartFile file) throws IOException;
 }

@@ -11,7 +11,9 @@ import com.atguigu.exam.mapper.QuestionAnswerMapper;
 import com.atguigu.exam.mapper.QuestionChoiceMapper;
 import com.atguigu.exam.mapper.QuestionMapper;
 import com.atguigu.exam.service.QuestionService;
+import com.atguigu.exam.utils.ExcelUtil;
 import com.atguigu.exam.utils.RedisUtils;
+import com.atguigu.exam.vo.QuestionImportVo;
 import com.atguigu.exam.vo.QuestionPageVo;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -22,7 +24,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -269,5 +273,22 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         fillQuestionChoiceAndAnswer(popularQuestions);
 
         return popularQuestions;
+    }
+
+    @Override
+    public List<QuestionImportVo> previewExcel(MultipartFile file) throws IOException {
+        //判断是否为空
+        if (file == null || file.getSize()==0) {
+            throw  new RuntimeException("上传的文件为空！！");
+
+        }
+
+        String filename = file.getOriginalFilename();
+        //判断是否是xls，xlsx结尾
+        if (!filename.endsWith(".xls") && !filename.endsWith(".xlsx")){
+            throw new RuntimeException("上传文件类型错误，必须是.xls文件或.xlsx文件");
+        }
+        List<QuestionImportVo> questionImportVos = ExcelUtil.parseExcel(file);
+        return questionImportVos;
     }
 }
