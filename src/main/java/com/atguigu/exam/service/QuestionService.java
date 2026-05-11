@@ -68,9 +68,35 @@ public interface QuestionService extends IService<Question> {
      */
     void customUpdateQuestion(Question question);
 
+    /**
+     *根据id删除题目
+     *
+     * @param id
+     */
     void customRemoveQuestionById(Long id);
 
+    /**
+     *
+     *展示热门题目
+     * @param size
+     * @return {@link List }<{@link Question }>
+     */
     List<Question> customPopularQuestion(Integer size);
 
+    /**
+     *预览题目
+     *
+     * @param file
+     * @return {@link List }<{@link QuestionImportVo }>
+     * @throws IOException
+     */
     List<QuestionImportVo> previewExcel(MultipartFile file) throws IOException;
+
+    /**
+     *导入解析后的题目
+     *
+     * @param questions
+     * @return int
+     */
+    int batchSaveExcelQuestion(List<QuestionImportVo> questions);
 }

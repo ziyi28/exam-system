@@ -76,6 +76,7 @@ public class QuestionBatchController {
     @Operation(summary = "从Excel文件批量导入题目", description = "解析Excel文件并将题目批量导入到数据库")  // API描述
     public Result<String> importFromExcel(
             @Parameter(description = "Excel文件，包含题目数据") @RequestParam("file") MultipartFile file) {
+
       return null;
     }
     
@@ -100,8 +101,10 @@ public class QuestionBatchController {
     @PostMapping("/import-questions")  // 处理POST请求
     @Operation(summary = "批量导入题目", description = "将题目列表批量导入到数据库，支持Excel解析后的导入或AI生成后的确认导入")  // API描述
     public Result<String> importQuestions(@RequestBody List<QuestionImportVo> questions) {
+        int success=questionService.batchSaveExcelQuestion(questions);
+        log.info("批量导入题目成功，导入的题目数量为{}，成功导入的数量为{}",questions.size(),success);
 
-       return Result.error("批量导入题目失败!" );
+       return Result.success("批量导入成功");
 
     }
     

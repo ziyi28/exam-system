@@ -20,6 +20,7 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.stereotype.Service;
@@ -146,6 +147,7 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
                 //保证排列顺序
                 questionChoice.setSort(i);
                 questionChoice.setQuestionId(question.getId());
+                questionChoiceMapper.insert(questionChoice);
                 if (questionChoice.getIsCorrect()){
                     if (sb.length()>0){
                         sb.append(",");
@@ -290,5 +292,60 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         }
         List<QuestionImportVo> questionImportVos = ExcelUtil.parseExcel(file);
         return questionImportVos;
+    }
+
+    @Override
+    public int batchSaveExcelQuestion(List<QuestionImportVo> questions) {
+        if (questions == null || questions.size()==0) {
+            throw new RuntimeException("解析后的题目为空，题目导入失败");
+        }
+        int succeessCount=0;
+        //将questionImportVo转为Question
+        for (int i = 0; i < questions.size(); i++) {
+            try{
+                Question question=convertImportQuestionToQuestion(questions.get(i));
+                customSaveQuestion(question);
+                succeessCount++;
+            }
+            catch (Exception e){
+                log.debug("题目{}导入失败",questions.get(i).getTitle());
+            }
+
+        }
+
+        return succeessCount;
+    }
+
+    /**
+     * 将questionImportVo变成Question
+     * @param questionImportVo
+     * @return
+     */
+
+    private Question convertImportQuestionToQuestion(QuestionImportVo questionImportVo) {
+        Question question = new Question();
+        //将导入的题目属性赋值给question
+        BeanUtils.copyProperties(questionImportVo,question);
+        //判断是否为选择题
+        if ("CHOICE".equals(questionImportVo.getType())){
+            if (questionImportVo.getChoices().size()>0) {
+                List<QuestionChoice> choices= new ArrayList<>(questionImportVo.getChoices().size());
+                for (QuestionImportVo.ChoiceImportDto choice : questionImportVo.getChoices()) {
+                    QuestionChoice questionChoice = new QuestionChoice();
+                    questionChoice.setContent(choice.getContent());
+                    questionChoice.setIsCorrect(choice.getIsCorrect());
+                    questionChoice.setSort(choice.getSort());
+                    choices.add(questionChoice);
+
+                }
+                question.setChoices(choices);
+            }
+        }
+        //不管是不是选择题创建答案并且赋值
+        QuestionAnswer questionAnswer = new QuestionAnswer();
+        questionAnswer.setAnswer(questionImportVo.getAnswer());
+        questionAnswer.setKeywords(questionAnswer.getKeywords());
+        question.setAnswer(questionAnswer);
+        return question;
     }
 }
