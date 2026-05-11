@@ -7,6 +7,9 @@ import java.util.List;
 
 /**
  * 题目批量导入Vo - 用于Excel导入和AI生成题目的数据传输
+ *
+ * @author ziyi
+ * @date 2026/05/11
  */
 @Data
 @Schema(description = "题目导入数据传输对象")

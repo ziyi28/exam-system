@@ -2,6 +2,7 @@ package com.atguigu.exam.controller;
 
 
 import com.atguigu.exam.common.Result;
+import com.atguigu.exam.service.DeepseekAiService;
 import com.atguigu.exam.service.QuestionService;
 import com.atguigu.exam.utils.ExcelUtil;
 import com.atguigu.exam.vo.AiGenerateRequestVo;
@@ -33,6 +34,8 @@ import java.util.List;
 public class QuestionBatchController {
     @Autowired
     private QuestionService questionService;
+    @Autowired
+    private DeepseekAiService deepseekAiService;
     
 
     /**
@@ -90,9 +93,11 @@ public class QuestionBatchController {
     @PostMapping("/ai-generate")  // 处理POST请求
     @Operation(summary = "AI智能生成题目", description = "使用AI技术根据指定主题和要求智能生成题目，支持预览后再决定是否导入")  // API描述
     public Result<List<QuestionImportVo>> generateQuestionsByAi(
-            @RequestBody @Validated AiGenerateRequestVo request) {
+            @RequestBody @Validated AiGenerateRequestVo request) throws InterruptedException {
+        List<QuestionImportVo> questionImportVoList=deepseekAiService.aiGenerateQuestions(request);
+        log.info("通过ai生成{}为标题的题目成功，预计生成{}道题目，成功生成{}道题目",request.getTopic(),request.getCount(),questionImportVoList.size());
 
-       return Result.error("AI生成题目失败");
+       return Result.success(questionImportVoList);
     }
     
     /**

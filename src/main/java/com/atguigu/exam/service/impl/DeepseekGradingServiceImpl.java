@@ -1,6 +1,6 @@
 package com.atguigu.exam.service.impl;
 
-import com.atguigu.exam.service.KimiGradingService;
+import com.atguigu.exam.service.DeepseekGradingService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -12,5 +12,5 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @Slf4j
-public class KimiGradingServiceImpl implements KimiGradingService {
+public class DeepseekGradingServiceImpl implements DeepseekGradingService {
 }
