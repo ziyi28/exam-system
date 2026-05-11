@@ -99,4 +99,11 @@ public interface QuestionService extends IService<Question> {
      * @return int
      */
     int batchSaveExcelQuestion(List<QuestionImportVo> questions);
+
+    /**
+     * 直接导入文件中的题目
+     * @param file
+     * @return
+     */
+    String batchSaveExcelFile(MultipartFile file) throws IOException;
 }

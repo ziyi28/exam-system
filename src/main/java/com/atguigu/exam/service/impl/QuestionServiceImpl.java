@@ -343,9 +343,28 @@ public class QuestionServiceImpl extends ServiceImpl<QuestionMapper, Question> i
         }
         //不管是不是选择题创建答案并且赋值
         QuestionAnswer questionAnswer = new QuestionAnswer();
-        questionAnswer.setAnswer(questionImportVo.getAnswer());
+        if ("JUDGE".equals(questionImportVo.getType())){
+            questionAnswer.setAnswer(questionImportVo.getAnswer().toUpperCase());
+        }
         questionAnswer.setKeywords(questionAnswer.getKeywords());
         question.setAnswer(questionAnswer);
         return question;
+    }
+
+    @Override
+    public String batchSaveExcelFile(MultipartFile file) throws IOException {
+        if (file==null || file.getSize()==0){
+            throw new RuntimeException("导入题目失败，导入的文件为空");
+        }
+        String filename = file.getOriginalFilename();
+        if (!filename.endsWith(".xls") && !filename.endsWith(".xlsx")){
+            throw new RuntimeException("导入的文件格式错误，必须是xls文件或xlsx文件");
+        }
+        //解析文件
+        List<QuestionImportVo> questionImportVos = ExcelUtil.parseExcel(file);
+        //调用已有方法保存
+        int i = batchSaveExcelQuestion(questionImportVos);
+        String result = "批量导入题目成功，识别到%s道题目，成功导入了%s道题目".formatted(questionImportVos.size(),i);
+        return result;
     }
 }

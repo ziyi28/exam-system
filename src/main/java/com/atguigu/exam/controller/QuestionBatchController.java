@@ -75,9 +75,11 @@ public class QuestionBatchController {
     @PostMapping("/import-excel")  // 处理POST请求
     @Operation(summary = "从Excel文件批量导入题目", description = "解析Excel文件并将题目批量导入到数据库")  // API描述
     public Result<String> importFromExcel(
-            @Parameter(description = "Excel文件，包含题目数据") @RequestParam("file") MultipartFile file) {
+            @Parameter(description = "Excel文件，包含题目数据") @RequestParam("file") MultipartFile file) throws IOException {
+        String result=questionService.batchSaveExcelFile(file);
+        log.info(result);
 
-      return null;
+      return Result.success(result);
     }
     
     /**
