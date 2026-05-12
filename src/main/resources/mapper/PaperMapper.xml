@@ -3,4 +3,44 @@
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.atguigu.exam.mapper.PaperMapper">
+    <resultMap id="paperMap" type="com.atguigu.exam.entity.Question">
+        <id column="id" property="id"/>
+        <association property="answer" javaType="com.atguigu.exam.entity.QuestionAnswer">
+            <id column="qsa_id" property="id"/>
+            <result column="question_id" property="questionId"/>
+            <result column="qsa_create_time" property="createTime"/>
+            <result column="qsa_update_time" property="updateTime"/>
+        </association>
+        <collection property="choices" ofType="com.atguigu.exam.entity.QuestionChoice" notNullColumn="qcs_id">
+            <id column="qcs_id" property="id"/>
+            <result column="qcs_create_time" property="createTime"/>
+            <result column="qcs_update_time" property="updateTime"/>
+        </collection>
+
+    </resultMap>
+
+    <select id="selectQuestionByPaperId" resultMap="paperMap">
+        select
+        pq.score paper_score,
+        qs.*,
+        qsa.id qsa_id,
+        qsa.question_id,
+        qsa.answer,
+        qsa.keywords,
+        qsa.create_time qsa_create_time,
+        qsa.update_time qsa_update_time,
+        qcs.id qcs_id,
+        qcs.question_id qcs_question_id,
+        qcs.content,
+        qcs.is_correct,
+        qcs.sort,
+        qcs.create_time qcs_create_time,
+        qcs.update_time qcs_update_time
+        from paper_question pq
+        inner join questions qs on pq.question_id=qs.id
+        inner join question_answer qsa
+        on qsa.question_id = qs.id
+        left JOIN question_choices qcs on qcs.question_id=qs.id and qcs.is_deleted=0
+        where pq.paper_id=#{id} and pq.is_deleted=0 and qs.is_deleted=0 and qsa.is_deleted=0 ORDER BY qcs.sort
+    </select>
 </mapper>

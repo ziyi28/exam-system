@@ -1,8 +1,11 @@
 package com.atguigu.exam.mapper;
 
 import com.atguigu.exam.entity.Paper;
+import com.atguigu.exam.entity.Question;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
+
+import java.util.List;
 
 /**
 * @author 86158
@@ -13,4 +16,5 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface PaperMapper extends BaseMapper<Paper> {
 
-} 
+    List<Question> selectQuestionByPaperId(Integer id);
+}
