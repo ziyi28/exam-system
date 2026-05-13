@@ -52,7 +52,9 @@ public class ExamController {
     @Operation(summary = "提交考试答案", description = "学生提交考试答案，系统记录答题情况")  // API描述
     public Result<Void> submitAnswers(
             @Parameter(description = "考试记录ID") @PathVariable Integer examRecordId, 
-            @RequestBody List<SubmitAnswerVo> answers) {
+            @RequestBody List<SubmitAnswerVo> answers) throws InterruptedException {
+        examService.submitExamAnswer(examRecordId,answers);
+        log.info("提交考试答案成功");
         return Result.success("答案提交成功");
     }
 
@@ -63,9 +65,10 @@ public class ExamController {
     @PostMapping("/{examRecordId}/grade")  // 处理POST请求
     @Operation(summary = "AI自动批阅", description = "使用AI技术自动批阅试卷，特别是简答题的智能评分")  // API描述
     public Result<ExamRecord> gradeExam(
-            @Parameter(description = "考试记录ID") @PathVariable Integer examRecordId) {
+            @Parameter(description = "考试记录ID") @PathVariable Integer examRecordId) throws InterruptedException {
+        ExamRecord examRecord = examService.gradeExam(examRecordId);
 
-        return Result.success(null, "试卷批阅完成");
+        return Result.success(examRecord, "试卷批阅完成");
     }
 
     /**

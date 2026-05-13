@@ -2,6 +2,7 @@ package com.atguigu.exam.service;
 
 import com.atguigu.exam.entity.ExamRecord;
 import com.atguigu.exam.vo.StartExamVo;
+import com.atguigu.exam.vo.SubmitAnswerVo;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
@@ -24,5 +25,14 @@ public interface ExamService extends IService<ExamRecord> {
      * @return {@link ExamRecord }
      */
     ExamRecord customDetailExamById(Integer id);
+
+    /**
+     * 提交考试答案
+     * @param examRecordId
+     * @param answers
+     */
+    void submitExamAnswer(Integer examRecordId, List<SubmitAnswerVo> answers) throws InterruptedException;
+
+    ExamRecord gradeExam(Integer examRecordId) throws InterruptedException;
 }
  
