@@ -9,6 +9,7 @@ import com.atguigu.exam.service.AnswerRecordService;
 import com.atguigu.exam.service.DeepseekAiService;
 import com.atguigu.exam.service.ExamService;
 import com.atguigu.exam.service.PaperService;
+import com.atguigu.exam.vo.ExamRankingVO;
 import com.atguigu.exam.vo.GradingResult;
 import com.atguigu.exam.vo.StartExamVo;
 import com.atguigu.exam.vo.SubmitAnswerVo;
@@ -40,6 +41,8 @@ public class ExamServiceImpl extends ServiceImpl<ExamRecordMapper, ExamRecord> i
     AnswerRecordService answerRecordService;
     @Autowired
     DeepseekAiService deepseekAiService;
+    @Autowired
+    ExamRecordMapper examRecordMapper;
 
 
     @Override
@@ -210,6 +213,11 @@ public class ExamServiceImpl extends ServiceImpl<ExamRecordMapper, ExamRecord> i
         return examRecord;
 
 
+    }
+
+    @Override
+    public List<ExamRankingVO> customGetRanking(Integer paperId, Integer limit) {
+        return examRecordMapper.customRankingLimit(paperId,limit);
     }
 
     private String normalizeJudgeAnswer(String answer) {

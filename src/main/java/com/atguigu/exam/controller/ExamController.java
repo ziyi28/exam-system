@@ -90,6 +90,7 @@ public class ExamController {
     @GetMapping("/records")  // 处理GET请求
     @Operation(summary = "获取考试记录列表", description = "获取所有考试记录列表，包含基本信息和成绩")  // API描述
     public Result<List<ExamRecord>> getMyRecords() {
+
         return Result.success(null);
     }
 } 
