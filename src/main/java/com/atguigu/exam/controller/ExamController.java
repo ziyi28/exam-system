@@ -3,11 +3,14 @@ package com.atguigu.exam.controller;
 
 import com.atguigu.exam.common.Result;
 import com.atguigu.exam.entity.ExamRecord;
+import com.atguigu.exam.service.ExamService;
 import com.atguigu.exam.vo.StartExamVo;
 import com.atguigu.exam.vo.SubmitAnswerVo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,11 +19,14 @@ import java.util.List;
  * 考试控制器 - 处理考试流程相关的HTTP请求
  * 包括开始考试、提交答案、AI批阅、成绩查询等功能
  */
+@Slf4j
 @RestController  // REST控制器，返回JSON数据
 @RequestMapping("/api/exams")  // 考试API路径前缀
 @CrossOrigin(origins = "*")  // 允许跨域访问
 @Tag(name = "考试管理", description = "考试流程相关操作，包括开始考试、答题提交、AI批阅、成绩查询等功能")  // Swagger API分组
 public class ExamController {
+    @Autowired
+    ExamService examService;
 
 
     /**
@@ -32,7 +38,9 @@ public class ExamController {
     @Operation(summary = "开始考试", description = "学生开始考试，创建考试记录并返回试卷内容")  // API描述
     public Result<ExamRecord> startExam(@RequestBody StartExamVo startExamVo) {
         // TODO: 从SecurityContext获取当前登录用户ID  // 暂时使用固定用户ID
-        return Result.success(null, "考试开始成功");
+        ExamRecord examRecord=examService.startExam(startExamVo);
+        log.info("开始考试成功，此次考试记录为：{}",examRecord);
+        return Result.success(examRecord, "考试开始成功");
     }
 
     /**
@@ -67,7 +75,10 @@ public class ExamController {
     @Operation(summary = "查询考试记录详情", description = "获取指定考试记录的详细信息，包括答题情况和得分")  // API描述
     public Result<ExamRecord> getExamRecordById(
             @Parameter(description = "考试记录ID") @PathVariable Integer id) {
-        return Result.success(null);
+        ExamRecord examRecord = examService.customDetailExamById(id);
+
+        log.info("查询考试详情记录成功，详情为{}",examRecord);
+        return Result.success(examRecord);
     }
 
     /**

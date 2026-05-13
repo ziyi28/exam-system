@@ -77,11 +77,11 @@ public class PaperServiceImpl extends ServiceImpl<PaperMapper, Paper> implements
             if (count==0){
                 throw new RuntimeException("id:%s试卷下没有题目，发布状态下试卷必须有题目！！".formatted(id));
             }
-            LambdaUpdateWrapper<Paper> updateWrapper = new LambdaUpdateWrapper<>();
-            updateWrapper.eq(Paper::getId, id);
-            updateWrapper.set(Paper::getStatus, status);
-            update(updateWrapper);
         }
+        LambdaUpdateWrapper<Paper> updateWrapper = new LambdaUpdateWrapper<>();
+        updateWrapper.set(Paper::getStatus, status);
+        updateWrapper.eq(Paper::getId, id);
+        update(updateWrapper);
 
     }
 

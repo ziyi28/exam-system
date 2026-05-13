@@ -1,6 +1,7 @@
 package com.atguigu.exam.service;
 
 import com.atguigu.exam.entity.ExamRecord;
+import com.atguigu.exam.vo.StartExamVo;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import java.util.List;
@@ -10,5 +11,18 @@ import java.util.List;
  */
 public interface ExamService extends IService<ExamRecord> {
 
-} 
+    /**
+     * 记录考试记录
+     * @param startExamVo
+     * @return {@link ExamRecord }
+     */
+    ExamRecord startExam(StartExamVo startExamVo);
+
+    /**
+     * 查询考试记录详情
+     * @param id
+     * @return {@link ExamRecord }
+     */
+    ExamRecord customDetailExamById(Integer id);
+}
  
